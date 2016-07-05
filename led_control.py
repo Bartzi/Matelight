@@ -11,8 +11,9 @@ class Crate(object):
         self.num_leds = height *  width
 
     def check_bounds(self, data):
-        assert data.shape[0] == self.width
-        assert data.shape[1] == self.height
+        # assert data.shape[0] == self.width
+        # assert data.shape[1] == self.height
+        pass
 
     @property
     def crate_in_next_row(self):
@@ -136,7 +137,7 @@ class LEDController(object):
         self.crates = [((x + abs(min_x), y), crate) for (x, y), crate in self.crates]
         self.crates = [((x, y + abs(min_y)), crate) for (x, y), crate in self.crates]
 
-        self.crates.sort(key=lambda x: (x[0][1], x[0][0]))
+        # self.crates.sort(key=lambda x: (x[0][1], x[0][0]))
 
         print(self.crates)
 
@@ -164,7 +165,7 @@ class LEDController(object):
                 display_data,
                 crate.transform_pixels(data[x * self.crate_width:(x + 1) * self.crate_width, y* self.crate_height:(y + 1) * self.crate_height]).flatten()
             )
-        self.device.write(np.ascontiguousarray(data))
+        self.device.write(np.ascontiguousarray(display_data))
         self.device.flush()
         time.sleep(0.1)
 
