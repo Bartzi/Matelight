@@ -1,0 +1,11 @@
+[Layout]
+crate_rows = 2
+crate_columns = 2
+crate_width = 5
+crate_height = 4
+
+[Crates]
+BottomRightCrate
+BottomLeftCrate
+TopLeftCrate
+TopRightCrate
