@@ -8,7 +8,7 @@ class Crate(object):
     def __init__(self, height=4, width=5):
         self.height = height
         self.width = width
-        self.num_leds = height *  width
+        self.num_leds = height * width
 
     def check_bounds(self, data):
         # assert data.shape[0] == self.width
@@ -24,16 +24,20 @@ class Crate(object):
         raise NotImplementedError("Please use subclass")   
 
     def reverse_every_even_column(self, data):
-        for row_id, row in enumerate(data):
-            if row_id % 2 == 0:
-                row = row[::-1]
-        return data
+        column_data = np.empty((0, ) + data.shape[1:], dtype=np.uint8)
+        for column_id, column in enumerate(data, start=1):
+            if column_id % 2 == 0:
+                column = column[::-1]
+            column_data = np.vstack((column_data, column[np.newaxis, ...]))
+        return column_data
 
     def reverse_every_odd_column(self, data):
-        for row_id, row in enumerate(data):
-            if row_id % 2 == 1:
-                row = row[::-1]
-        return data
+        column_data = np.empty((0, ) + data.shape[1:], dtype=np.uint8)
+        for column_id, column in enumerate(data, start=1):
+            if column_id % 2 == 1:
+                column = column[::-1]
+            column_data = np.vstack((column_data, column[np.newaxis, ...]))
+        return column_data
 
     def transform_pixels(self, data):
         raise NotImplementedError("Please use subclass of Crate")
