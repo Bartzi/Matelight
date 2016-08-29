@@ -2,6 +2,7 @@ import configparser
 import time
 
 import numpy as np
+from scipy.misc import imresize
 
 
 class Crate(object):
@@ -41,6 +42,9 @@ class Crate(object):
 
     def transform_pixels(self, data):
         raise NotImplementedError("Please use subclass of Crate")
+
+    def __str__(self):
+        return self.__class__.__name__
 
 
 class BottomLeftCrate(Crate):
@@ -120,7 +124,10 @@ class LEDController(object):
         self.crate_height = int(self.config["Layout"]["crate_height"])
         self.leds_per_crate = self.crate_width * self.crate_height
 
-        crates = list(self.config["Crates"].keys())
+        self.image_width = self.crate_width * self.crate_columns
+        self.image_height = self.crate_height * self.crate_rows
+
+        crates = [crate.strip().lower() for crate in self.config["Crates"]["crates"].split(",")]
         self.crates = [((0,0), NAME_TO_CRATE[crates[0]]())]
         for crate in crates[1:]:
             crate_type = NAME_TO_CRATE[crate]
@@ -141,26 +148,14 @@ class LEDController(object):
         self.crates = [((x + abs(min_x), y), crate) for (x, y), crate in self.crates]
         self.crates = [((x, y + abs(min_y)), crate) for (x, y), crate in self.crates]
 
-        # self.crates.sort(key=lambda x: (x[0][1], x[0][0]))
-
         print(self.crates)
 
         self.device = open(device_name, "wb")
 
-    def pad_unit_data(self, data):
-        real_data = np.zeros(((self.num_units * LEDS_PER_UNIT + (self.num_units - 1) * LEDS_OUTSIDE_UNIT) * len(data.shape)))
-        data = data.flatten()
-        for idx in range(self.num_units):
-            start_index = idx * LEDS_PER_UNIT * 3
-            end_index = (idx + 1) * LEDS_PER_UNIT * 3
-            num_leds_outside = idx * LEDS_OUTSIDE_UNIT * 3
-            real_data[start_index + num_leds_outside:end_index + num_leds_outside] = data[start_index:end_index]
-        return real_data
-
     def display(self, data):
         if len(data.shape) != 3 or data.shape[0] * data.shape[1] != self.num_crates * self.leds_per_crate:
             print(data.shape)
-            raise ValueError("Supplied data needs to have shape like (x, y, z), where z = [1,3] and x * y <= num_leds")
+            data = imresize(data, (self.image_height, self.image_width, 3))
         # make data column major
         data = np.transpose(data, (1, 0, 2)).astype(np.uint8)
         display_data = np.empty((0,), dtype=np.uint8)
@@ -171,7 +166,6 @@ class LEDController(object):
             )
         self.device.write(np.ascontiguousarray(display_data))
         self.device.flush()
-        time.sleep(0.1)
 
     def turn_off_lights(self):
         data = np.full((self.num_crates * self.leds_per_crate, 1, 3), 0, dtype=np.uint8)
@@ -193,7 +187,7 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
 
-    data = np.full((8, 10, 3), 0, dtype=np.uint8)
+    data = np.full((12, 15, 3), 0, dtype=np.uint8)
     colors = np.vectorize(lambda x: random.randint(0, 255))
     controller = LEDController(args.config)
     try:

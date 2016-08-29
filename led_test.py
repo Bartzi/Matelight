@@ -33,16 +33,15 @@ def interpolate(controller):
 
 
 def display_image(controller, image, slide_image=False):
-    image_data = np.array(image.getdata()).reshape((image.height, image.width, len(image.getbands())))
-    window_size = (8, 10)
+    image_data = np.array(image)
+    window_size = (12, 15)
     window_position = 0
-    for _ in range(500):    
+    while True:
         data = image_data.copy()[:, window_position:min(window_position + window_size[1], image.width), ...]
 
         height, width, channels = data.shape
         fill_data = np.zeros((height, window_size[1] - width, channels))
         data = np.hstack((data, fill_data))
-        print(data.shape, end='\r')
 
         controller.display(data)
         if slide_image:
@@ -62,12 +61,12 @@ def show_image(controller):
 
 
 def render_text(controller):
-    font_size = 10
+    font_size = 20
     font = None
 
     while True:
         font = ImageFont.truetype(args.font, font_size)
-        if font.getsize(args.text)[1] <= 8:
+        if font.getsize(args.text)[1] <= 12:
             break
         font_size -= 1
     print(font_size)
