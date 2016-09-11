@@ -150,12 +150,15 @@ class LEDController(object):
 
         print(self.crates)
 
-        self.device = open(device_name, "wb")
+        self.device = None
+        self.device_name = device_name
 
     def display(self, data):
         if len(data.shape) != 3 or data.shape[0] * data.shape[1] != self.num_crates * self.leds_per_crate:
             print(data.shape)
             data = imresize(data, (self.image_height, self.image_width, 3))
+        if self.device is None:
+            self.device = open(self.device_name, "wb")
         # make data column major
         data = np.transpose(data, (1, 0, 2)).astype(np.uint8)
         display_data = np.empty((0,), dtype=np.uint8)
