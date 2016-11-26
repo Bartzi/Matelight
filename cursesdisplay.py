@@ -16,7 +16,7 @@ class CursesDisplay:
         curses.init_pair(2, curses.COLOR_GREEN, curses.COLOR_BLACK)
         curses.init_pair(3, curses.COLOR_BLUE,  curses.COLOR_BLACK)
 
-    def update(self, arr):
+    def display(self, arr):
         self.pad.clear()
 
         it = np.nditer(arr[:,:,0], flags=['multi_index'])
