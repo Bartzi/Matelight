@@ -38,13 +38,15 @@ class PixelEngine():
         self.position = (y, x)
 
         output = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        output[y, x, 1] = 255
+        output[y, x, :] = np.random.randint(0, 255, size=3)
 
         for d in self.displays:
             d.display(output)
 
 
-class PixelServer(socketserver.UDPServer):
+class PixelServer(socketserver.UDPServer, socketserver.ForkingMixIn):
+
+    request_size = 1
 
     def __init__(self, *args, **kwargs):
         self.controller = kwargs.pop('controller')
