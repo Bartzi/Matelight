@@ -20,10 +20,30 @@ class PixelEngine():
 
         self.displays.append(CursesDisplay.new(self.height, self.width+1))
 
-        self.position = (6, 8)
+        self.start_position = (6, 8)
+        self.clients = {}
+        self.colours = [np.array([255, 0, 0]), np.array([0, 255, 0]), np.array([0, 0, 255])]
 
-    def handle(self, data):
-        y, x = self.position
+    def run(self):
+        def game_loop():
+            while True:
+                pass
+
+    def handle(self, data, client_address):
+        try:
+            client = self.clients[client_address]
+        except KeyError:
+            if len(self.clients) >= 3:
+                return
+
+            client = {
+                "colour": self.colours[len(self.clients)],
+                "position": self.start_position
+            }
+            self.clients[client_address] = client
+        # print()
+
+        y, x = client["position"]
 
         k = chr(int(data))
         if k == 'w':
@@ -35,10 +55,14 @@ class PixelEngine():
         elif k == 'd':
             x = min(self.width-2, x+1)
 
-        self.position = (y, x)
+        client["position"] = (y, x)
+
+        self.clients[client_address] = client
 
         output = np.zeros((self.height, self.width, 3), dtype=np.uint8)
-        output[y, x, :] = np.random.randint(0, 255, size=3)
+        for client_data in self.clients.values():
+            y, x = client_data["position"]
+            output[y, x, :] = client_data["colour"]
 
         for d in self.displays:
             d.display(output)
@@ -69,7 +93,7 @@ class PixelHandler(socketserver.DatagramRequestHandler):
 
     def handle(self):
         data = self.rfile.read().decode("utf-8").strip()
-        self.controller.handle(data)
+        self.controller.handle(data, self.client_address[0])
 
 
 if __name__ == '__main__':
