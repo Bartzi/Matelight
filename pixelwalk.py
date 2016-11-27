@@ -32,9 +32,13 @@ class PixelEngine():
                 sleep(1 / self.fps)
 
                 output = np.zeros((self.height, self.width, 3), dtype=np.uint8)
+                zombie_colour = np.random.randint(0, 255, size=3)
                 for client_data in self.clients.values():
                     y, x = client_data["position"]
-                    output[y, x, :] = client_data["colour"]
+                    if client_data["zombie"]:
+                        output[y, x, :] = zombie_colour
+                    else:
+                        output[y, x, :] = client_data["colour"]
 
                 for d in self.displays:
                     d.display(output)
@@ -52,7 +56,8 @@ class PixelEngine():
 
             client = {
                 "colour": self.colours[len(self.clients)],
-                "position": self.start_position
+                "position": self.start_position,
+                "zombie": True if len(self.clients) == 0 else False,
             }
             self.clients[client_address] = client
         # print()
@@ -68,6 +73,11 @@ class PixelEngine():
             x = max(0, x-1)
         elif k == 'd':
             x = min(self.width-1, x+1)
+
+        if client["zombie"]:
+            for c in self.clients.values():
+                if c["position"] == client["position"]:
+                    c["zombie"] = True
 
         client["position"] = (y, x)
 
