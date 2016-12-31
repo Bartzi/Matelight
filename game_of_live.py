@@ -50,19 +50,24 @@ class Game(object):
         pymlgame.init()
         self.screen = Screen(self.host, self.port,
                              self.width, self.height)
-        self.clock = Clock(15)
+        self.clock = Clock(5)
         self.running = True
         self.colors = [WHITE, BLUE, GREEN, CYAN, MAGENTA, YELLOW, RED]
         self.color_length = math.ceil(self.screen.height / len(self.colors))
 
         # surfaces
+        self.game_board = None
+        self.init_game_board()
+
+        self.dots = Surface(self.screen.width, self.screen.height)
+
+    def init_game_board(self):
         self.game_board = [0 for _ in range(self.screen.height * self.screen.width)]
-        indices = random.sample(range(self.screen.height * self.screen.width), random.randint(self.screen.width // 2, (2 * (self.screen.height * self.screen.width) // 3)))
+        indices = random.sample(range(self.screen.height * self.screen.width), random.randint(self.screen.width // 2, (
+        2 * (self.screen.height * self.screen.width) // 3)))
 
         for index in indices:
             self.game_board[index] = 1
-
-        self.dots = Surface(self.screen.width, self.screen.height)
 
     def offset(self, width_idx, height_idx):
         return height_idx * self.screen.width + width_idx
@@ -78,6 +83,8 @@ class Game(object):
         """
         # this is not really neccesary because the surface is black after initializing
         self.dots.fill(BLACK)
+
+        intermediate_buffer = self.game_board.copy()
 
         for h_index in range(self.screen.height):
             for w_index in range(self.screen.width):
@@ -106,14 +113,16 @@ class Game(object):
 
                 if self.game_board[cell_offset] == 0:
                     if num_alive == 3:
-                        self.game_board[cell_offset] = 1
+                        intermediate_buffer[cell_offset] = 1
                         self.dots.draw_dot((w_index, h_index), self.colors[h_index // self.color_length])
                 elif num_alive < 2:
-                    self.game_board[cell_offset] = 0
+                    intermediate_buffer[cell_offset] = 0
                 elif 2 <= num_alive <= 3:
                     self.dots.draw_dot((w_index, h_index), self.colors[h_index // self.color_length])
                 else:
-                    self.game_board[cell_offset] = 0
+                    intermediate_buffer[cell_offset] = 0
+
+        self.game_board = intermediate_buffer.copy()
 
     def render(self):
         """
@@ -138,10 +147,10 @@ class Game(object):
                 self.players.pop(event.uid)
             elif event.type == E_KEYDOWN:
                 #print(datetime.now(), '###', self.players[event.uid]['name'], 'pressed', event.button)
-                self.colors.append(self.colors.pop(0))
-            elif event.type == E_KEYUP:
-                #print(datetime.now(), '###', self.players[event.uid]['name'], 'released', event.button)
-                self.colors.append(self.colors.pop(0))
+                if event.button == 9:
+                    self.init_game_board()
+                else:
+                    self.colors.append(self.colors.pop(0))
             elif event.type == E_PING:
                 #print(datetime.now(), '### ping from', self.players[event.uid]['name'])
                 pass
@@ -160,6 +169,20 @@ class Game(object):
 
 
 if __name__ == '__main__':
-    GAME = Game('127.0.0.1', 1337, 40, 16)
-    #GAME = Game('matelight.cbrp3.c-base.org', 1337, 40, 16)
+    import argparse
+
+    parser = argparse.ArgumentParser(description='game of live for matelight')
+    parser.add_argument('host', help='remote host to connect to')
+    parser.add_argument('-p', '--port', type=int, default=1337, help='remote port')
+    parser.add_argument('--width', type=int, default=15, help='width of matelight')
+    parser.add_argument('--height', type=int, default=12, help='height of matelight')
+
+    args = parser.parse_args()
+
+    GAME = Game(
+        args.host,
+        args.port,
+        args.width,
+        args.height,
+    )
     GAME.gameloop()
