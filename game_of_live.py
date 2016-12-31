@@ -1,29 +1,11 @@
 #!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 
-"""
-pymlgame - example game
-=======================
-
-This example shows how a simple pymlgame could be written. You also need a connected controller to actually see
-something happening. You can use the controller example for this.
-"""
 import random
 
 from collections import Counter
 
 import math
-
-__author__ = 'Ricardo Band'
-__copyright__ = 'Ricardo Band'
-__credits__ = ['Ricardo Band']
-__license__ = 'MIT'
-__version__ = '0.3.1'
-__maintainer__ = 'Ricardo Band'
-__email__ = 'email@ricardo.band'
-__status__ = 'Development'
-
-from datetime import datetime
 
 import pymlgame
 from pymlgame.locals import WHITE, BLUE, GREEN, CYAN, MAGENTA, YELLOW, RED, BLACK, E_NEWCTLR, E_DISCONNECT, E_KEYDOWN, E_KEYUP, E_PING
@@ -63,8 +45,10 @@ class Game(object):
 
     def init_game_board(self):
         self.game_board = [0 for _ in range(self.screen.height * self.screen.width)]
-        indices = random.sample(range(self.screen.height * self.screen.width), random.randint(self.screen.width // 2, (
-        2 * (self.screen.height * self.screen.width) // 3)))
+        indices = random.sample(
+            range(self.screen.height * self.screen.width),
+            random.randint(self.screen.width // 2, (2 * (self.screen.height * self.screen.width) // 3))
+        )
 
         for index in indices:
             self.game_board[index] = 1
@@ -91,7 +75,7 @@ class Game(object):
                 id_above = h_index - 1 if h_index - 1 >= 0 else -1
                 id_left = w_index - 1 if w_index - 1 >= 0 else -1
                 id_right = w_index + 1 if w_index + 1 < self.screen.width else -1
-                id_bottom = h_index + 1 if h_index + 1 <- self.screen.height else -1
+                id_bottom = h_index + 1 if h_index + 1 < self.screen.height else -1
 
                 cell_offset = self.offset(w_index, h_index)
 
