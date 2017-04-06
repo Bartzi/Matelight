@@ -159,7 +159,7 @@ if __name__ == '__main__':
     parser.add_argument('host', help='remote host to connect to')
     parser.add_argument('-p', '--port', type=int, default=1337, help='remote port')
     parser.add_argument('--width', type=int, default=15, help='width of matelight')
-    parser.add_argument('--height', type=int, default=12, help='height of matelight')
+    parser.add_argument('--height', type=int, default=16, help='height of matelight')
 
     args = parser.parse_args()
 
