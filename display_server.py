@@ -34,8 +34,9 @@ class DataListener:
                 # if crc1 and crc1 != crc2:  # crc1 zero-check for backward-compatibility
                 #     self.log('Error receiving UDP frame: Invalid frame CRC checksum: Expected {}, got {}'.format(crc2, crc1))
                 #     continue
-            elif len(data) != self.frame_size * 3:
+            elif len(data) != self.frame_size:
                 self.log('Error receiving UDP frame: Invalid frame size: {}'.format(len(data)))
+                continue
             yield 'udp:'+addr, data
 
 
